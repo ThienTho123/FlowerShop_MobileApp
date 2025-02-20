@@ -1,24 +1,43 @@
 package com.example.flowershop_mobileapp.network;
 
+import android.content.Context;
+import okhttp3.OkHttpClient;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import java.io.IOException;
 
 public class ApiClient {
+    private static final String BASE_URL = "http://192.168.1.11:8080/";
 
-    private static Retrofit retrofit;
-    private static final String BASE_URL = "http://localhost:8080";
+    public static ApiService getApiService(Context context) {
+        // 🔥 Lấy token từ SharedPreferences
+        String token = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+                .getString("token", "");
 
-    public static Retrofit getRetrofitInstance() {
-        if (retrofit == null) {
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        }
-        return retrofit;
-    }
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        Request originalRequest = chain.request();
+                        Request.Builder requestBuilder = originalRequest.newBuilder()
+                                .header("Authorization", "Bearer " + token);
+                        Request request = requestBuilder.build();
+                        return chain.proceed(request);
+                    }
+                })
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .build();
 
-    public static ApiService getApiService() {
-        return getRetrofitInstance().create(ApiService.class);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        return retrofit.create(ApiService.class);
     }
 }

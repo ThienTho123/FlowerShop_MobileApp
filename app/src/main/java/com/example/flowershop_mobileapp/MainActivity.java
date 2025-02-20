@@ -1,75 +1,101 @@
 package com.example.flowershop_mobileapp;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.flowershop_mobileapp.models.Order;
-import com.example.flowershop_mobileapp.network.ApiClient;
-import com.example.flowershop_mobileapp.network.ApiService;
-
-import java.util.List;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    private ApiService apiService;
-    private RecyclerView recyclerView;
-    private OrderAdapter orderAdapter;
+
+    private DrawerLayout drawerLayout;
+    private NavController navController;
+    private AppBarConfiguration appBarConfiguration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // Ánh xạ các thành phần
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navView = findViewById(R.id.nav_view);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        apiService = ApiClient.getApiService();
-        fetchOrders();
-    }
+        // Thiết lập Navigation Controller
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_account,
+                R.id.nav_delivered_orders,
+                R.id.nav_unassigned_orders,
+                R.id.nav_pending_orders,
+                R.id.nav_change_password,
+                R.id.nav_logout
+        ).setOpenableLayout(drawerLayout).build();
 
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        NavigationUI.setupWithNavController(navView, navController);
 
-    private void fetchOrders() {
-        // Gọi phương thức getAllOrders() thay vì getOrders()
-        apiService.getAllOrders().enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    // Lấy danh sách đơn hàng từ response
-                    Map<String, Object> orderMap = response.body();
-                    List<Order> orders = (List<Order>) orderMap.get("orderList");
-
-                    // Đặt adapter cho RecyclerView
-                    orderAdapter = new OrderAdapter(orders);
-                    recyclerView.setAdapter(orderAdapter);
-
-                    // Log thông tin đơn hàng với các phương thức getter
-                    for (Order order : orders) {
-                        Log.d("API", "ID: " + order.getId());
-                        Log.d("API", "Customer Name: " + order.getCustomerName());
-                        Log.d("API", "Flower Type: " + order.getFlowerType());
-                        Log.d("API", "Quantity: " + order.getQuantity());
-                        Log.d("API", "Status: " + order.getStatus());
-                    }
-                } else {
-                    Log.e("API", "Lỗi response: " + response.message());
-                    Toast.makeText(MainActivity.this, "Lỗi tải đơn hàng", Toast.LENGTH_SHORT).show();
-                }
+        // Xử lý sự kiện khi chọn item trong Navigation Drawer
+        navView.setNavigationItemSelectedListener(menuItem -> {
+            if (menuItem.getItemId() == R.id.nav_logout) {
+                showLogoutDialog(); // Để hộp thoại đăng xuất hiển thị từ MainActivity
+            } else {
+                NavigationUI.onNavDestinationSelected(menuItem, navController);
+                drawerLayout.closeDrawer(GravityCompat.START);
             }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Log.e("API", "Lỗi kết nối: " + t.getMessage());
-                Toast.makeText(MainActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
-            }
+            return true;
         });
+
     }
+
+    // Xử lý nút back để đóng drawer nếu đang mở
+    @Override
+    public boolean onSupportNavigateUp() {
+        return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp();
+    }
+
+    // Hiển thị hộp thoại xác nhận đăng xuất
+    private void showLogoutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Đăng xuất")
+                .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
+                .setPositiveButton("Có", (dialog, which) -> {
+                    // Xóa token lưu trữ (shared preferences hoặc database tùy theo cách bạn lưu)
+                    clearUserToken();
+
+                    // Tạo Intent để mở LoginActivity
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+
+                    // Xóa tất cả các activity trong back stack và bắt đầu một task mới
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+                    startActivity(intent);  // Mở LoginActivity
+                    finish();  // Đóng MainActivity, không cho quay lại
+                })
+                .setNegativeButton("Không", null)
+                .show();
+    }
+
+    // Hàm clear token
+    private void clearUserToken() {
+        // Ví dụ với SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("auth_token"); // Tên key của token
+        editor.apply();
+    }
+
+
+
 }

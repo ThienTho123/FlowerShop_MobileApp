@@ -1,70 +1,33 @@
 package com.example.flowershop_mobileapp.models;
+import com.example.flowershop_mobileapp.models.FlowerSize;
 
 import com.google.gson.annotations.SerializedName;
+import java.math.BigDecimal;
+import java.util.List;
 
 public class Order {
+    @SerializedName("orderID")  // Đảm bảo Retrofit map đúng dữ liệu
+    private int orderID;
 
-    @SerializedName("id")
-    private int id;
-
-    @SerializedName("customerName")
+    @SerializedName("name")
     private String customerName;
 
-    @SerializedName("flowerType")
-    private String flowerType;
+    @SerializedName("totalAmount")
+    private BigDecimal totalAmount;
 
-    @SerializedName("quantity")
-    private int quantity;
+    @SerializedName("orderDetails")
+    private List<OrderDetail> orderDetails;
 
-    @SerializedName("status")
-    private String status;
+    // Getter & Setter
+    public int getOrderID() { return orderID; }
+    public void setOrderID(int orderID) { this.orderID = orderID; }
 
-    // Constructor, Getters and Setters
-    public Order(int id, String customerName, String flowerType, int quantity, String status) {
-        this.id = id;
-        this.customerName = customerName;
-        this.flowerType = flowerType;
-        this.quantity = quantity;
-        this.status = status;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public int getId() {
-        return id;
-    }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-    public String getFlowerType() {
-        return flowerType;
-    }
-
-    public void setFlowerType(String flowerType) {
-        this.flowerType = flowerType;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public List<OrderDetail> getOrderDetails() { return orderDetails; }
+    public void setOrderDetails(List<OrderDetail> orderDetails) { this.orderDetails = orderDetails; }
 }

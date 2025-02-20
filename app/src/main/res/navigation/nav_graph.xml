@@ -1,28 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/nav_graph"
-            app:startDestination="@id/FirstFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/nav_account">
 
     <fragment
-            android:id="@+id/FirstFragment"
-            android:name="com.example.flowershop_mobileapp.FirstFragment"
-            android:label="@string/first_fragment_label"
-            tools:layout="@layout/fragment_first">
+        android:id="@+id/nav_account"
+        android:name="com.example.flowershop_mobileapp.ui.AccountFragment"
+        android:label="Tài khoản" />
 
-        <action
-                android:id="@+id/action_FirstFragment_to_SecondFragment"
-                app:destination="@id/SecondFragment"/>
-    </fragment>
+
     <fragment
-            android:id="@+id/SecondFragment"
-            android:name="com.example.flowershop_mobileapp.SecondFragment"
-            android:label="@string/second_fragment_label"
-            tools:layout="@layout/fragment_second">
+        android:id="@+id/nav_delivered_orders"
+        android:name="com.example.flowershop_mobileapp.ui.DeliveredOrdersFragment"
+        android:label="Đơn hàng đã giao" />
 
+    <fragment
+        android:id="@+id/nav_unassigned_orders"
+        android:name="com.example.flowershop_mobileapp.ui.UnassignedOrdersFragment"
+        android:label="Đơn hàng chưa nhận" />
+
+    <fragment
+        android:id="@+id/nav_pending_orders"
+        android:name="com.example.flowershop_mobileapp.ui.PendingOrdersFragment"
+        android:label="Đơn hàng cần giao" />
+
+    <fragment
+        android:id="@+id/nav_change_password"
+        android:name="com.example.flowershop_mobileapp.ui.ChangePasswordFragment"
+        android:label="Đổi mật khẩu" />
+
+    <fragment
+        android:id="@+id/nav_logout"
+        android:name="com.example.flowershop_mobileapp.ui.LogoutFragment"
+        android:label="Đăng xuất" />
+    <fragment
+        android:id="@+id/firstFragment"
+        android:name="com.example.flowershop_mobileapp.ui.FirstFragment"
+        android:label="First Fragment">
         <action
-                android:id="@+id/action_SecondFragment_to_FirstFragment"
-                app:destination="@id/FirstFragment"/>
+            android:id="@+id/action_firstFragment_to_secondFragment"
+            app:destination="@id/secondFragment"/>
     </fragment>
+
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.example.flowershop_mobileapp.ui.SecondFragment"
+        android:label="Second Fragment">
+        <action
+            android:id="@+id/action_secondFragment_to_firstFragment"
+            app:destination="@id/firstFragment"/>
+    </fragment>
+
 </navigation>

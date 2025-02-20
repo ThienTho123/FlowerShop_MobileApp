@@ -2,4 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="colorButtonStroke">#F671E3</color>
+    <color name="colorButtonDisabled">#1E1C1B1F</color>
+    <color name="colorPinkLight">#F0A8D0</color>
+    <color name="colorPinkSoft">#F7B5CA</color>
+    <color name="colorPinkSoftLight">#FFC6C6</color>
+    <color name="colorCream">#FFEBD4</color>
+    <color name="colorPeach">#F2D1C9</color>
+    <color name="colorLavender">#E8C9F1</color>
+    <color name="colorMint">#C8F7D3</color>
+    <color name="colorPastelYellow">#F9F0A2</color>
+    <color name="colorCoral">#FF6F61</color>
+    <color name="colorGray">#B0B0B0</color>
+
 </resources>

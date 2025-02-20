@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background_with_overlay">  <!-- Sử dụng drawable với ảnh mờ -->
+    >
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPinkLight"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:title="Tài khoản"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="@drawable/ic_menu" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- Ảnh đại diện -->
+            <ImageView
+                android:id="@+id/imgAvatar"
+                android:layout_width="230dp"
+                android:layout_height="230dp"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_avatar_placeholder"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/circle_background"/>
+
+            <!-- Họ và Tên -->
+            <TextView
+                android:id="@+id/tvShipperName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên shipper"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorCoral"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Card chứa thông tin -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="15dp"
+                android:backgroundTint="@color/colorPeach"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- Username -->
+                    <TextView
+                        android:id="@+id/tvUsername"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Username: shipper123"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Số điện thoại -->
+                    <TextView
+                        android:id="@+id/tvPhoneNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Số điện thoại: 0123456789"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Email -->
+                    <TextView
+                        android:id="@+id/tvEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Email: shipper@example.com"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Địa chỉ -->
+                    <TextView
+                        android:id="@+id/tvAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Địa chỉ: Chưa có thông tin"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Nút cập nhật thông tin -->
+            <!-- Nút cập nhật thông tin -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUpdateProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cập nhật thông tin"
+                android:textSize="17sp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                app:cornerRadius="19dp"
+                app:strokeColor="@color/colorPinkLight"
+                app:strokeWidth="5dp"
+                android:backgroundTint="@color/colorPinkSoft"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_marginTop="24dp"
+                android:padding="10dp"
+                android:minWidth="250dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"/>
+
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

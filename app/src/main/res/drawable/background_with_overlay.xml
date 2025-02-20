@@ -1,0 +1,11 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Ảnh background -->
+    <item android:drawable="@drawable/home" />
+
+    <!-- Lớp phủ mờ -->
+    <item>
+        <shape xmlns:android="http://schemas.android.com/apk/res/android">
+            <solid android:color="#C0FFFFFF" />
+        </shape>
+    </item>
+</layer-list>
