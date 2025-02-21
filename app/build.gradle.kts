@@ -51,6 +51,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
     implementation ("com.github.bumptech.glide:glide:4.15.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
 
     testImplementation("junit:junit:4.13.2")

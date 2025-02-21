@@ -1,33 +1,43 @@
 package com.example.flowershop_mobileapp.models;
-import com.example.flowershop_mobileapp.models.FlowerSize;
 
-import com.google.gson.annotations.SerializedName;
-import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class Order {
-    @SerializedName("orderID")  // Đảm bảo Retrofit map đúng dữ liệu
     private int orderID;
+    private String name;
+    private String phoneNumber;
+    private String deliveryAddress;
+    private List<Integer> date;
+    private String condition;
 
-    @SerializedName("name")
-    private String customerName;
+    public Order(int orderID, String name, String phoneNumber, String deliveryAddress, List<Integer> date, String condition) {
+        this.orderID = orderID;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.deliveryAddress = deliveryAddress;
+        this.date = date;
+        this.condition = condition;
+    }
 
-    @SerializedName("totalAmount")
-    private BigDecimal totalAmount;
-
-    @SerializedName("orderDetails")
-    private List<OrderDetail> orderDetails;
-
-    // Getter & Setter
     public int getOrderID() { return orderID; }
-    public void setOrderID(int orderID) { this.orderID = orderID; }
+    public String getName() { return name; }
+    public String getPhoneNumber() { return phoneNumber; }
+    public String getDeliveryAddress() { return deliveryAddress; }
+    public String getCondition() { return condition; }
 
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    // Chuyển danh sách số nguyên thành ngày/tháng/năm
+    public String getFormattedDate() {
+        if (date == null || date.size() < 6) {
+            return "N/A"; // Dữ liệu không hợp lệ
+        }
 
-    public BigDecimal getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(date.get(0), date.get(1) - 1, date.get(2), date.get(3), date.get(4), date.get(5));
 
-    public List<OrderDetail> getOrderDetails() { return orderDetails; }
-    public void setOrderDetails(List<OrderDetail> orderDetails) { this.orderDetails = orderDetails; }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
 }

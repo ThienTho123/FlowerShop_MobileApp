@@ -1,12 +1,10 @@
 package com.example.flowershop_mobileapp.network;
 import com.example.flowershop_mobileapp.models.AuthResponse;
 import com.example.flowershop_mobileapp.models.LoginRequest;
-import com.example.flowershop_mobileapp.models.Order;
 import com.example.flowershop_mobileapp.models.ChangePassword;
 
-import com.example.flowershop_mobileapp.dto.OrderShippingDTO;
 import com.example.flowershop_mobileapp.dto.ShippingRequest;
-import com.example.flowershop_mobileapp.models.OrderResponse;
+import com.example.flowershop_mobileapp.models.Order;
 import com.example.flowershop_mobileapp.models.User;
 
 import java.util.List;
@@ -24,12 +22,6 @@ import retrofit2.http.Path;
 import retrofit2.http.POST;
 
 public interface ApiService {
-
-    // Lấy tất cả đơn hàng chưa có shipping
-
-
-    @GET("shipper") // Endpoint API
-    Call<OrderResponse> getAllOrders();
 
     @POST("api/v1/auth/authenticate") // ⚡ Cập nhật đường dẫn đúng
     Call<AuthResponse> login(@Body LoginRequest loginRequest);
@@ -50,7 +42,11 @@ public interface ApiService {
     @PUT("/shipperaccount/changepassword")
     Call<Void> changePassword(@Body ChangePassword changePassword);
 
+    @GET("shipperaccount/ordership")
+    Call<Map<String, List<Order>>> getDeliveredOrders();
 
+    @GET("shipperaccount/ordership/{orderid}")
+    Call<Map<String, Order>> getOrderDetails(@Path("orderid") int orderId);
     // Lấy thông tin chi tiết đơn hàng
     @GET("/shipper/{id}")
     Call<Map<String, Object>> getOrder(@Path("id") int orderId);

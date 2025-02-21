@@ -31,7 +31,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
-        <activity android:name=".OrderActivity" />
+        <activity android:name=".ui.DeliveredOrdersFragment"
+            tools:ignore="Instantiatable" />
+
         <activity android:name=".ui.UpdateProfileActivity"
             android:theme="@style/Theme.FlowerShop_MobileApp"
         />
