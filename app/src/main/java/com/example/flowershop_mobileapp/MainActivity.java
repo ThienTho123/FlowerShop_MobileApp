@@ -1,5 +1,6 @@
 package com.example.flowershop_mobileapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,15 +25,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Kiểm tra token, nếu không có token thì quay về LoginActivity
+        if (!isLoggedIn()) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_main);
 
-        // Ánh xạ các thành phần
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navView = findViewById(R.id.nav_view);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Thiết lập Navigation Controller
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_account,
@@ -46,56 +55,51 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-        // Xử lý sự kiện khi chọn item trong Navigation Drawer
         navView.setNavigationItemSelectedListener(menuItem -> {
             if (menuItem.getItemId() == R.id.nav_logout) {
-                showLogoutDialog(); // Để hộp thoại đăng xuất hiển thị từ MainActivity
+                showLogoutDialog();
             } else {
                 NavigationUI.onNavDestinationSelected(menuItem, navController);
                 drawerLayout.closeDrawer(GravityCompat.START);
             }
             return true;
         });
-
     }
 
-    // Xử lý nút back để đóng drawer nếu đang mở
     @Override
     public boolean onSupportNavigateUp() {
         return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp();
     }
 
-    // Hiển thị hộp thoại xác nhận đăng xuất
+    // Kiểm tra xem có token không
+    private boolean isLoggedIn() {
+        SharedPreferences sharedPreferences = getSharedPreferences("auth", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("token", "");
+        return token != null && !token.isEmpty();
+    }
+
+    // Hiển thị hộp thoại đăng xuất
     private void showLogoutDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Đăng xuất")
                 .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
-                .setPositiveButton("Có", (dialog, which) -> {
-                    // Xóa token lưu trữ (shared preferences hoặc database tùy theo cách bạn lưu)
-                    clearUserToken();
-
-                    // Tạo Intent để mở LoginActivity
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-
-                    // Xóa tất cả các activity trong back stack và bắt đầu một task mới
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-                    startActivity(intent);  // Mở LoginActivity
-                    finish();  // Đóng MainActivity, không cho quay lại
-                })
+                .setPositiveButton("Có", (dialog, which) -> logout())
                 .setNegativeButton("Không", null)
                 .show();
     }
 
-    // Hàm clear token
-    private void clearUserToken() {
-        // Ví dụ với SharedPreferences
-        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+    // Xử lý đăng xuất
+    private void logout() {
+        // Xóa token trong SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("auth", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove("auth_token"); // Tên key của token
+        editor.remove("token");
         editor.apply();
+
+        // Chuyển về màn hình đăng nhập và xóa hết các activity trước đó
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
-
-
-
 }

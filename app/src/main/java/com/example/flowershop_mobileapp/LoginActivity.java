@@ -31,12 +31,9 @@ public class LoginActivity extends AppCompatActivity {
         edtPassword = findViewById(R.id.edtPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
-        // Kiểm tra và xóa token nếu có
-        clearToken();
-
         apiService = ApiClient.getApiService(this);
 
-        if (isLoggedIn()) {
+        if (isLoggedIn()) { // Nếu đã đăng nhập, chuyển sang MainActivity
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }
@@ -44,7 +41,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> loginUser());
     }
 
-    // Hàm kiểm tra đăng nhập
+    // Kiểm tra xem token có hợp lệ không
     private boolean isLoggedIn() {
         SharedPreferences sharedPreferences = getSharedPreferences("auth", Context.MODE_PRIVATE);
         String token = sharedPreferences.getString("token", "");
@@ -71,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse authResponse = response.body();
                     String token = authResponse.getAccessToken();
-                    Log.d("LoginAPI", "Token received: " + token); // Kiểm tra token
+                    Log.d("LoginAPI", "Token received: " + token);
 
                     if (token != null && !token.isEmpty()) {
                         saveToken(token);
@@ -100,14 +97,6 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("auth", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("token", token);
-        editor.apply();
-    }
-
-    // Hàm xóa token nếu có
-    private void clearToken() {
-        SharedPreferences sharedPreferences = getSharedPreferences("auth", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove("token"); // Xóa token nếu có
         editor.apply();
     }
 }

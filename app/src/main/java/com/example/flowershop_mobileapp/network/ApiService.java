@@ -48,7 +48,8 @@ public interface ApiService {
             @Body User user
     );
     @PUT("/shipperaccount/changepassword")
-    Call<String> changePassword(@Body ChangePassword changePassword);
+    Call<Void> changePassword(@Body ChangePassword changePassword);
+
 
     // Lấy thông tin chi tiết đơn hàng
     @GET("/shipper/{id}")
