@@ -20,6 +20,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.flowershop_mobileapp.R;
 import com.example.flowershop_mobileapp.models.Order;
+import com.example.flowershop_mobileapp.models.OrderDetail;
 import com.example.flowershop_mobileapp.models.UnassignedOrderDetail;
 import com.example.flowershop_mobileapp.network.ApiClient;
 
@@ -166,12 +167,12 @@ public class UnassignedOrdersFragment extends Fragment {
     }
 
     private void openOrderDetail(int orderID) {
-        ApiClient.getApiService(getContext()).getUnassignedOrdersDetail(orderID).enqueue(new Callback<UnassignedOrderDetail>() {
+        ApiClient.getApiService(getContext()).getUnassignedOrdersDetail(orderID).enqueue(new Callback<OrderDetail>() {
             @Override
-            public void onResponse(Call<UnassignedOrderDetail> call, Response<UnassignedOrderDetail> response) {
+            public void onResponse(Call<OrderDetail> call, Response<OrderDetail> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Intent intent = new Intent(getContext(), OrderDetailActivity.class);
-                    intent.putExtra("ORDER_DETAIL", response.body());
+                    Intent intent = new Intent(getContext(), UnassignedOrderDetailActivity.class);
+                    intent.putExtra("ORDER_ID", orderID);
                     startActivity(intent);
                 } else {
                     Toast.makeText(getContext(), "Lỗi tải chi tiết đơn hàng!", Toast.LENGTH_SHORT).show();
@@ -179,11 +180,12 @@ public class UnassignedOrdersFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<UnassignedOrderDetail> call, Throwable t) {
+            public void onFailure(Call<OrderDetail> call, Throwable t) {
                 Toast.makeText(getContext(), "Lỗi kết nối!", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
 
     private TextView createCell(String text) {

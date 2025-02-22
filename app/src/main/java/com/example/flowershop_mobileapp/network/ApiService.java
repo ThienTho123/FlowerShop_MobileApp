@@ -3,10 +3,9 @@ import com.example.flowershop_mobileapp.models.AuthResponse;
 import com.example.flowershop_mobileapp.models.LoginRequest;
 import com.example.flowershop_mobileapp.models.ChangePassword;
 
-import com.example.flowershop_mobileapp.models.ShippingRequest;
 import com.example.flowershop_mobileapp.models.Order;
 import com.example.flowershop_mobileapp.models.OrderDetail;
-import com.example.flowershop_mobileapp.models.UnassignedOrderDetail;
+import com.example.flowershop_mobileapp.models.ShippingRequest;
 import com.example.flowershop_mobileapp.models.User;
 
 import java.util.List;
@@ -49,12 +48,12 @@ public interface ApiService {
     @GET("/shipper")
     Call<Map<String, List<Order>>> getUnassignedOrders();
 
-    @GET("shipper/{id}")
-    Call<UnassignedOrderDetail> getUnassignedOrdersDetail(@Path("id") int orderUnassignedId);
+    @GET("/shipper/{id}")
+    Call<OrderDetail> getUnassignedOrdersDetail(@Path("id") int orderID);
 
     // API nhận đơn hàng
-    @POST("shipper/{id}/receive")
-    Call<Void> receiveOrder(@Path("id") int orderId, @Body ShippingRequest request);
+    @POST("/shipper/{orderID}/receive")
+    Call<Void> acceptOrder(@Path("orderID") int orderID, @Body ShippingRequest shippingRequest);
 
 
     @GET("shipperaccount/ordership/{orderid}")

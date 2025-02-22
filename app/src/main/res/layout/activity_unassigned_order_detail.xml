@@ -6,7 +6,8 @@
     xmlns:app="http://schemas.android.com/tools"
     android:padding="16dp"
     android:fillViewport="true"
-    android:background="#F8F8F8">
+    android:background="#F8F8F8"
+    app:ignore="NamespaceTypo">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,13 +67,65 @@
                 <TextView android:text="Tình Trạng Thanh Toán:" style="@style/LabelText"/>
                 <TextView android:id="@+id/txtPaymentStatus" style="@style/ValueText"/>
 
+                <!-- Di chuyển phần danh sách sản phẩm lên trên -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Danh Sách Sản Phẩm"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingTop="15dp"
+                    android:textColor="@color/black"/>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    card_view:cardCornerRadius="8dp"
+                    card_view:cardElevation="2dp"
+                    android:background="@android:color/white"
+                    android:padding="8dp">
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fillViewport="true">
+
+                        <TableLayout
+                            android:id="@+id/tableProducts"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:stretchColumns="1,2,3,4">
+
+                            <!-- Header Table -->
+                            <TableRow android:background="@color/colorPinkLight">
+                                <TextView style="@style/TableHeader" android:text="STT"/>
+
+                                <TextView
+                                    style="@style/TableHeader"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tên hoa" />
+                                <TextView style="@style/TableHeader" android:text="Kích thước"/>
+                                <TextView style="@style/TableHeader" android:text="Dài x Rộng x Cao"/>
+                                <TextView style="@style/TableHeader" android:text="Khối lượng"/>
+                                <TextView style="@style/TableHeader" android:text="Số lượng"/>
+                                <TextView style="@style/TableHeader" android:text="Đơn giá"/>
+                                <TextView style="@style/TableHeader" android:text="Tổng"/>
+                                <TextView style="@style/TableHeader" android:text="Đã thanh toán"/>
+                            </TableRow>
+                        </TableLayout>
+                    </HorizontalScrollView>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Phần nhập ghi chú và nút nhận đơn nằm bên dưới danh sách sản phẩm -->
                 <EditText
                     android:id="@+id/edtNote"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Nhập ghi chú"
-                    android:padding="8dp"
-                     />
+                    android:padding="8dp" />
 
                 <Button
                     android:id="@+id/btnAcceptOrder"
