@@ -146,6 +146,11 @@ public class OrderDetail implements Serializable {
     public String getStartDeliveryDate() { return getActiveOrder() != null ? getActiveOrder().startDeliveryDate : ""; }
     public String getEndDeliveryDate() { return getActiveOrder() != null ? getActiveOrder().endDeliveryDate : ""; }
     public String getPaymentStatus() { return getActiveOrder() != null ? getActiveOrder().paymentStatus : ""; }
+
+    public String getOrderStatus() {
+        return getActiveOrder() != null ? getActiveOrder().status : "";
+    }
+
     public List<Product> getProducts() { return getActiveOrder() != null ? getActiveOrder().getProducts() : new ArrayList<>(); }
 
     public BigDecimal getRemainingAmount() {

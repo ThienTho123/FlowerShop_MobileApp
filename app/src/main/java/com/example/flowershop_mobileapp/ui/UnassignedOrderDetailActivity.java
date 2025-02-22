@@ -45,7 +45,10 @@ public class UnassignedOrderDetailActivity extends AppCompatActivity {
         apiService = ApiClient.getApiService(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> finish());
+
 
         txtOrderID = findViewById(R.id.txtOrderID);
         txtCustomerName = findViewById(R.id.txtCustomerName);

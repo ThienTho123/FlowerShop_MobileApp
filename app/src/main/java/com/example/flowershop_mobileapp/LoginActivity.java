@@ -11,8 +11,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.flowershop_mobileapp.models.AuthResponse;
 import com.example.flowershop_mobileapp.models.LoginRequest;
+import com.example.flowershop_mobileapp.models.User;
 import com.example.flowershop_mobileapp.network.ApiClient;
 import com.example.flowershop_mobileapp.network.ApiService;
+import com.google.gson.Gson;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -68,7 +71,6 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse authResponse = response.body();
                     String token = authResponse.getAccessToken();
-                    Log.d("LoginAPI", "Token received: " + token);
 
                     if (token != null && !token.isEmpty()) {
                         saveToken(token);

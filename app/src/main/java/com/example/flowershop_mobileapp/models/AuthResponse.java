@@ -11,7 +11,11 @@ public class AuthResponse {
 
     @SerializedName("idAccount") // (Tuỳ chọn) Nếu cần ID tài khoản
     private int idAccount;
-
+    @SerializedName("user")
+    private User user; // ✅ Thêm user vào response
+    public User getUser() { // ✅ Thêm getter cho User
+        return user;
+    }
     public String getAccessToken() {
         return accessToken;
     }

@@ -59,4 +59,20 @@ public interface ApiService {
     @GET("shipperaccount/ordership/{orderid}")
     Call<OrderDetail> getOrderDetail(@Path("orderid") int orderID);
 
+
+    @GET("/shipperaccount/haveship")
+    Call<Map<String, List<Order>>> getPendingDeliveryOrders();
+
+    @GET("/shipperaccount/haveship/{orderid}")
+    Call<OrderDetail> getPendingOrderDetail(@Path("orderid") int orderID);
+    @POST("/shipperaccount/haveship/{orderid}/start")
+    Call<String> startDelivery(@Path("orderid") int orderID);
+
+    @POST("/shipperaccount/haveship/{orderid}/fail")
+    Call<String> failDelivery(@Path("orderid") int orderID);
+
+    @POST("/shipperaccount/haveship/{orderid}/success")
+    Call<String> successDelivery(@Path("orderid") int orderID);
+
+
 }

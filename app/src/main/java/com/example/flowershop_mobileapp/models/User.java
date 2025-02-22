@@ -23,7 +23,8 @@ public class User {
 
     @SerializedName("avatar")
     private String avatarUrl;
-
+    @SerializedName("role")  // ✅ Thêm trường role
+    private String role;
     public User() {}
 
     public User(String fullName, String phoneNumber, String email, String address, String avatarUrl) {
@@ -50,7 +51,9 @@ public class User {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
-
+    public String getRole() {  // ✅ Thêm getter cho role
+        return role;
+    }
     public String getPhoneNumber() {
         return phoneNumber;
     }

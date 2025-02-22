@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -16,34 +17,40 @@
         app:titleTextColor="@android:color/white"
         app:navigationIcon="@drawable/ic_back" />
 
-    <!-- Swipe để refresh danh sách -->
+    <!-- SwipeRefreshLayout để làm mới danh sách -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Scroll ngang để tránh bị cắt nội dung -->
-        <HorizontalScrollView
+        <!-- ScrollView giúp cuộn dọc -->
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <!-- HorizontalScrollView giúp cuộn ngang -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:fillViewport="true">
 
-
-
-                <!-- Nội dung đơn hàng -->
-                <TableLayout
-                    android:id="@+id/tableOrders"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:stretchColumns="*"
-                    android:background="@android:color/white"/>
-            </LinearLayout>
-        </HorizontalScrollView>
+                    android:orientation="vertical">
+
+                    <!-- TableLayout hiển thị danh sách đơn hàng -->
+                    <TableLayout
+                        android:id="@+id/tableOrders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:stretchColumns="*"
+                        android:background="@android:color/white"/>
+                </LinearLayout>
+            </HorizontalScrollView>
+        </ScrollView>
+
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>

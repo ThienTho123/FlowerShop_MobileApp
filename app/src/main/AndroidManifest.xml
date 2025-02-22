@@ -32,6 +32,7 @@
         </activity>
         <activity android:name=".ui.OrderDetailActivity" />
         <activity android:name=".ui.UnassignedOrderDetailActivity" />
+        <activity android:name=".ui.PendingOrdersDetailActivity" />
 
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.DeliveredOrdersFragment"
