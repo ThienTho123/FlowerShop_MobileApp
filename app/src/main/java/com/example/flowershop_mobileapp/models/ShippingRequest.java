@@ -1,15 +1,12 @@
-package com.example.flowershop_mobileapp.dto;
+package com.example.flowershop_mobileapp.models;
 
 public class ShippingRequest {
-
     private String note;
 
-    // Constructor
     public ShippingRequest(String note) {
         this.note = note;
     }
 
-    // Getter and Setter
     public String getNote() {
         return note;
     }

@@ -30,6 +30,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ui.OrderDetailActivity" />
+        <activity android:name=".ui.UnassignedOrderDetailActivity" />
+
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.DeliveredOrdersFragment"
             tools:ignore="Instantiatable" />

@@ -3,8 +3,10 @@ import com.example.flowershop_mobileapp.models.AuthResponse;
 import com.example.flowershop_mobileapp.models.LoginRequest;
 import com.example.flowershop_mobileapp.models.ChangePassword;
 
-import com.example.flowershop_mobileapp.dto.ShippingRequest;
+import com.example.flowershop_mobileapp.models.ShippingRequest;
 import com.example.flowershop_mobileapp.models.Order;
+import com.example.flowershop_mobileapp.models.OrderDetail;
+import com.example.flowershop_mobileapp.models.UnassignedOrderDetail;
 import com.example.flowershop_mobileapp.models.User;
 
 import java.util.List;
@@ -44,14 +46,18 @@ public interface ApiService {
 
     @GET("shipperaccount/ordership")
     Call<Map<String, List<Order>>> getDeliveredOrders();
+    @GET("/shipper")
+    Call<Map<String, List<Order>>> getUnassignedOrders();
+
+    @GET("shipper/{id}")
+    Call<UnassignedOrderDetail> getUnassignedOrdersDetail(@Path("id") int orderUnassignedId);
+
+    // API nhận đơn hàng
+    @POST("shipper/{id}/receive")
+    Call<Void> receiveOrder(@Path("id") int orderId, @Body ShippingRequest request);
+
 
     @GET("shipperaccount/ordership/{orderid}")
-    Call<Map<String, Order>> getOrderDetails(@Path("orderid") int orderId);
-    // Lấy thông tin chi tiết đơn hàng
-    @GET("/shipper/{id}")
-    Call<Map<String, Object>> getOrder(@Path("id") int orderId);
+    Call<OrderDetail> getOrderDetail(@Path("orderid") int orderID);
 
-    // Chấp nhận đơn hàng (nhận shipping)
-    @POST("/shipper/{orderID}/receive")
-    Call<String> receiveOrder(@Path("orderID") int orderID, @Body ShippingRequest shippingRequest);
 }

@@ -18,10 +18,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.flowershop_mobileapp.MainActivity;
 import com.example.flowershop_mobileapp.R;
-import com.example.flowershop_mobileapp.network.ApiClient;
 import com.example.flowershop_mobileapp.models.Order;
+import com.example.flowershop_mobileapp.models.UnassignedOrderDetail;
+import com.example.flowershop_mobileapp.network.ApiClient;
 
 import java.util.List;
 import java.util.Map;
@@ -30,21 +30,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DeliveredOrdersFragment extends Fragment {
+public class UnassignedOrdersFragment extends Fragment {
     private TableLayout tableOrders;
     private SwipeRefreshLayout swipeRefresh;
-    private static final int ROW_HEIGHT = 250; // Đặt chiều cao cố định cho tất cả hàng
+    private static final int ROW_HEIGHT = 250;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_delivered_orders, container, false);
+        View view = inflater.inflate(R.layout.fragment_unassigned_orders, container, false);
 
         tableOrders = view.findViewById(R.id.tableOrders);
         swipeRefresh = view.findViewById(R.id.swipeRefresh);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
 
-        // Xử lý sự kiện khi bấm nút quay lại
         toolbar.setNavigationOnClickListener(v -> navigateBackToMain());
 
         fetchOrders();
@@ -56,7 +55,7 @@ public class DeliveredOrdersFragment extends Fragment {
     private void fetchOrders() {
         swipeRefresh.setRefreshing(true);
 
-        ApiClient.getApiService(getContext()).getDeliveredOrders().enqueue(new Callback<Map<String, List<Order>>>() {
+        ApiClient.getApiService(getContext()).getUnassignedOrders().enqueue(new Callback<Map<String, List<Order>>>() {
             @Override
             public void onResponse(Call<Map<String, List<Order>>> call, Response<Map<String, List<Order>>> response) {
                 swipeRefresh.setRefreshing(false);
@@ -80,42 +79,75 @@ public class DeliveredOrdersFragment extends Fragment {
     private void displayOrders(List<Order> orders) {
         tableOrders.removeAllViews();
 
-        // ✅ Thêm dòng tiêu đề
+        // Thêm dòng tiêu đề
         TableRow headerRow = new TableRow(getContext());
         headerRow.addView(createHeaderCell("STT"));
         headerRow.addView(createHeaderCell("Mã Đơn"));
         headerRow.addView(createHeaderCell("Khách Hàng"));
         headerRow.addView(createHeaderCell("SĐT"));
         headerRow.addView(createHeaderCell("Địa Chỉ"));
-        headerRow.addView(createHeaderCell("Ngày Nhận"));
         headerRow.addView(createHeaderCell("Trạng Thái"));
 
-        tableOrders.addView(headerRow); // ✅ Thêm tiêu đề vào bảng
+        tableOrders.addView(headerRow);
 
         int index = 1;
         for (Order order : orders) {
             TableRow row = new TableRow(getContext());
 
-            // Mã đơn hàng (có thể bấm vào)
             TextView orderIDCell = createCell(String.valueOf(order.getOrderID()));
             orderIDCell.setTextColor(Color.BLUE);
             orderIDCell.setOnClickListener(v -> openOrderDetail(order.getOrderID()));
 
-            row.addView(createCell(String.valueOf(index)));  // STT
-            row.addView(orderIDCell);  // Mã đơn
-            row.addView(createCell(order.getName()));  // Tên khách hàng
-            row.addView(createCell(order.getPhoneNumber()));  // SĐT
-            row.addView(createCell(order.getDeliveryAddress()));  // Địa chỉ
-            row.addView(createCell(order.getFormattedDate()));  // Ngày nhận
+            row.addView(createCell(String.valueOf(index)));
+            row.addView(orderIDCell);
+            row.addView(createCell(order.getName()));
+            row.addView(createCell(order.getPhoneNumber()));
+            row.addView(createCell(order.getDeliveryAddress()));
 
-            // ✅ Xử lý trạng thái đơn hàng
+            // ✅ Xử lý dịch trạng thái đơn hàng
             String status = order.getCondition();
-            if ("Return_to_shop".equals(status)) {
-                status = "Trả về cửa hàng";
-            } else if ("Delivered_Successfully".equals(status)) {
-                status = "Giao hàng thành công";
+            switch (status) {
+                case "Cancel_is_Processing":
+                    status = "Hủy đang xử lý";
+                    break;
+                case "Cancelled":
+                    status = "Đã hủy";
+                    break;
+                case "In_Transit":
+                    status = "Đang vận chuyển";
+                    break;
+                case "Shipper_Delivering":
+                    status = "Shipper đang giao hàng";
+                    break;
+                case "First_Attempt_Failed":
+                    status = "Lần giao hàng đầu tiên thất bại";
+                    break;
+                case "Second_Attempt_Failed":
+                    status = "Lần giao hàng thứ hai thất bại";
+                    break;
+                case "Third_Attempt_Failed":
+                    status = "Lần giao hàng thứ ba thất bại";
+                    break;
+                case "Delivered_Successfully":
+                    status = "Giao hàng thành công";
+                    break;
+                case "Return_to_shop":
+                    status = "Trả về cửa hàng";
+                    break;
+                case "Pending":
+                    status = "Đang chờ xử lý";
+                    break;
+                case "Processing":
+                    status = "Đang xử lý";
+                    break;
+                case "Prepare":
+                    status = "Chuẩn bị";
+                    break;
+                default:
+                    status = "Không xác định";
+                    break;
             }
-            row.addView(createCell(status));  // Trạng thái
+            row.addView(createCell(status));
 
             tableOrders.addView(row);
             index++;
@@ -128,19 +160,30 @@ public class DeliveredOrdersFragment extends Fragment {
         textView.setPadding(12, 8, 12, 8);
         textView.setTextSize(16);
         textView.setTextColor(Color.WHITE);
-        textView.setBackgroundColor(getResources().getColor(R.color.colorPinkSoft)); // Màu nền header
+        textView.setBackgroundColor(getResources().getColor(R.color.colorPinkSoft));
         textView.setGravity(Gravity.CENTER);
         return textView;
     }
 
-
-
     private void openOrderDetail(int orderID) {
-        Intent intent = new Intent(getContext(), OrderDetailActivity.class);
-        intent.putExtra("ORDER_ID", orderID);
-        startActivity(intent);
-    }
+        ApiClient.getApiService(getContext()).getUnassignedOrdersDetail(orderID).enqueue(new Callback<UnassignedOrderDetail>() {
+            @Override
+            public void onResponse(Call<UnassignedOrderDetail> call, Response<UnassignedOrderDetail> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Intent intent = new Intent(getContext(), OrderDetailActivity.class);
+                    intent.putExtra("ORDER_DETAIL", response.body());
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getContext(), "Lỗi tải chi tiết đơn hàng!", Toast.LENGTH_SHORT).show();
+                }
+            }
 
+            @Override
+            public void onFailure(Call<UnassignedOrderDetail> call, Throwable t) {
+                Toast.makeText(getContext(), "Lỗi kết nối!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
     private TextView createCell(String text) {
@@ -153,9 +196,6 @@ public class DeliveredOrdersFragment extends Fragment {
         textView.setGravity(Gravity.CENTER);
         return textView;
     }
-
-
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -172,5 +212,4 @@ public class DeliveredOrdersFragment extends Fragment {
             requireActivity().onBackPressed();
         }
     }
-
 }
