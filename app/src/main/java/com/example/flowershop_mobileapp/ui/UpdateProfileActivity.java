@@ -20,7 +20,10 @@ import com.example.flowershop_mobileapp.models.User;
 import com.example.flowershop_mobileapp.network.ApiClient;
 import com.example.flowershop_mobileapp.network.ApiService;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import okhttp3.MediaType;
@@ -137,36 +140,47 @@ public class UpdateProfileActivity extends AppCompatActivity {
     }
 
     private void uploadImageToServer(Uri imageUri) {
-        String filePath = getRealPathFromURI(this, imageUri);
-        if (filePath == null) {
-            Toast.makeText(this, "Không thể lấy đường dẫn file!", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), toByteArray(inputStream));
+            MultipartBody.Part body = MultipartBody.Part.createFormData("file", "image.jpg", requestBody);
 
-        File file = new File(filePath);
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
-
-        apiService.uploadImage("Bearer " + token, body).enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String imageUrl = (String) response.body().get("DT");
-                    avatarUri = Uri.parse(imageUrl);
-                    Glide.with(UpdateProfileActivity.this).load(imageUrl).into(binding.imgAvatar);
-                } else {
-                    Toast.makeText(UpdateProfileActivity.this, "Upload ảnh thất bại!", Toast.LENGTH_SHORT).show();
+            apiService.uploadImage("Bearer " + token, body).enqueue(new Callback<Map<String, Object>>() {
+                @Override
+                public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String imageUrl = (String) response.body().get("DT");
+                        avatarUri = Uri.parse(imageUrl);
+                        Glide.with(UpdateProfileActivity.this).load(imageUrl).into(binding.imgAvatar);
+                    } else {
+                        Toast.makeText(UpdateProfileActivity.this, "Upload ảnh thất bại!", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Log.e("Upload", "Lỗi upload ảnh: " + t.getMessage());
-                Toast.makeText(UpdateProfileActivity.this, "Lỗi kết nối khi upload ảnh!", Toast.LENGTH_SHORT).show();
-            }
+                @Override
+                public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                    Log.e("Upload", "Lỗi upload ảnh: " + t.getMessage());
+                    Toast.makeText(UpdateProfileActivity.this, "Lỗi kết nối khi upload ảnh!", Toast.LENGTH_SHORT).show();
+                }
+            });
 
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Không thể mở ảnh!", Toast.LENGTH_SHORT).show();
+        }
     }
+
+    // Chuyển InputStream thành byte array
+    private byte[] toByteArray(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[1024];
+        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+        return buffer.toByteArray();
+    }
+
 
     private String getRealPathFromURI(Context context, Uri contentUri) {
         String[] projection = {MediaStore.Images.Media.DATA};

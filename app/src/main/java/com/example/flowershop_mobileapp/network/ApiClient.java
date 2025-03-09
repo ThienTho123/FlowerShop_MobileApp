@@ -12,7 +12,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 import java.io.IOException;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://192.168.1.11:8080/";
+    private static final String BASE_URL = "http://192.168.1.10:8080/";
 
     public static ApiService getApiService(Context context) {
         // 🔥 Lấy token từ SharedPreferences
