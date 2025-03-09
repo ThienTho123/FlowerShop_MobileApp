@@ -1,10 +1,16 @@
 package com.example.flowershop_mobileapp.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -15,10 +21,15 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.Manifest;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.example.flowershop_mobileapp.R;
 import com.example.flowershop_mobileapp.models.OrderDetail;
@@ -29,11 +40,16 @@ import com.example.flowershop_mobileapp.network.ApiService;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import okhttp3.MediaType;
@@ -56,9 +72,11 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
     private Uri proofImageUri;
     private String token;
 
+    private Uri cameraImageUri; // Lưu URI ảnh chụp
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pending_order_detail);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -69,6 +87,10 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
         token = getSharedPreferences("auth", MODE_PRIVATE).getString("token", "");
 
         toolbar.setNavigationOnClickListener(v -> onBackPressed()); // 🔙 Xử lý quay lại
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 100);
+        }
 
         // Ánh xạ view
         txtOrderID = findViewById(R.id.txtOrderID);
@@ -131,16 +153,57 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
             uploadImage(orderID, false); // ✅ Gửi ảnh + lý do khi người dùng ấn nút
         });
 
-        imgDeliveryProof.setOnClickListener(v -> {
-            Log.d("DEBUG", "Người dùng bấm vào imgDeliveryProof để chọn ảnh.");
-            selectImage();
-        });
+        imgDeliveryProof.setOnClickListener(v -> showImageSourceDialog());
+
 
     }
-    private void selectImage() {
+    private void showImageSourceDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Chọn nguồn ảnh")
+                .setItems(new CharSequence[]{"Chụp ảnh", "Chọn từ thư viện"}, (dialog, which) -> {
+                    if (which == 0) {
+                        captureImage(); // Chụp ảnh bằng camera
+                    } else {
+                        selectImageFromGallery(); // Chọn ảnh từ thư viện
+                    }
+                })
+                .show();
+    }
+    private void captureImage() {
+        Log.d("DEBUG", "captureImage() được gọi!");
+
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, 300);  // 🚀 Bỏ qua kiểm tra `resolveActivity()`
+    }
+
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Quyền Camera đã được cấp!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Ứng dụng cần quyền Camera để chụp ảnh!", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+    private File createImageFile() {
+        try {
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String imageFileName = "IMG_" + timeStamp;
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            return File.createTempFile(imageFileName, ".jpg", storageDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    private void selectImageFromGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        startActivityForResult(intent, 200);
+        startActivityForResult(intent, 200); // Request code 200 cho thư viện
     }
 
     private void selectImageForSuccess(int orderID) {
@@ -165,14 +228,43 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-            proofImageUri = data.getData();
-            imgDeliveryProof.setVisibility(View.VISIBLE);
-            imgDeliveryProof.setImageURI(proofImageUri);
-
-            Log.d("DEBUG", "Ảnh đã chọn: " + proofImageUri.toString()); // Kiểm tra ảnh có được chọn không
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == 200 && data != null && data.getData() != null) {
+                // Ảnh từ thư viện
+                proofImageUri = data.getData();
+                imgDeliveryProof.setVisibility(View.VISIBLE);
+                imgDeliveryProof.setImageURI(proofImageUri);
+                Log.d("DEBUG", "Ảnh từ thư viện: " + proofImageUri.toString());
+            } else if (requestCode == 300 && data != null) {
+                // Ảnh chụp từ Camera
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                if (photo != null) {
+                    proofImageUri = saveBitmapToFile(photo);
+                    imgDeliveryProof.setVisibility(View.VISIBLE);
+                    imgDeliveryProof.setImageURI(proofImageUri);
+                    Log.d("DEBUG", "Ảnh chụp từ Camera đã lưu: " + proofImageUri.toString());
+                } else {
+                    Log.e("DEBUG", "Không thể lấy ảnh chụp từ Camera!");
+                }
+            }
         }
     }
+    private Uri saveBitmapToFile(Bitmap bitmap) {
+        File imageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "captured_image.jpg");
+        try {
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+            return Uri.fromFile(imageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("DEBUG", "Lỗi khi lưu ảnh chụp!");
+            return null;
+        }
+    }
+
+
 
 
     private void uploadImage(int orderID, boolean isSuccess) {
