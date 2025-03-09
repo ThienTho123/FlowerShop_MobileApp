@@ -198,25 +198,20 @@
                     android:textSize="16sp"/>
                 <Button
                     android:id="@+id/btnSuccessDelivery"
+                    style="@style/CustomButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Thành công"
-                    android:background="@color/colorCoral"
-                    android:textColor="@android:color/white"
-                    android:layout_marginTop="12dp"
-                    /> <!-- Đảm bảo ban đầu là "gone" -->
-
-
+                    android:layout_marginTop="12dp"/>
 
                 <Button
                     android:id="@+id/btnFailDelivery"
+                    style="@style/CustomButtonStyle.Red"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Thất bại"
-                    android:background="@color/colorButtonStroke"
-                    android:textColor="@android:color/white"
-                    android:layout_marginTop="12dp"
-                    /> <!-- Đảm bảo ban đầu là "gone" -->
+                    android:layout_marginTop="12dp"/>
+
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

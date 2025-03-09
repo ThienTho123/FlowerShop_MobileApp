@@ -46,6 +46,21 @@
         <item name="android:textColor">@android:color/darker_gray</item>
     </style>
 
+    <style name="CustomButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/colorGreen</item> <!-- Ép màu xanh lá -->
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">18sp</item> <!-- Chỉnh kích thước chữ -->
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <style name="CustomButtonStyle.Red" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/colorRed</item> <!-- Ép màu đỏ -->
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+
 
     <!-- Style cho giá trị dữ liệu -->
     <style name="ValueText">

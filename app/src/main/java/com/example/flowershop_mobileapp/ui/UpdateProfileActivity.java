@@ -1,17 +1,22 @@
 package com.example.flowershop_mobileapp.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
 import com.bumptech.glide.Glide;
 import com.example.flowershop_mobileapp.MainActivity;
 import com.example.flowershop_mobileapp.R;
@@ -22,8 +27,12 @@ import com.example.flowershop_mobileapp.network.ApiService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 import okhttp3.MediaType;
@@ -40,6 +49,9 @@ public class UpdateProfileActivity extends AppCompatActivity {
     private String token;
     private Uri avatarUri;
 
+    private Uri cameraImageUri;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +64,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         loadUserProfile();
 
         binding.btnSave.setOnClickListener(v -> updateUserProfile());
-        binding.imgAvatar.setOnClickListener(v -> chooseImageFromGallery());
+        binding.imgAvatar.setOnClickListener(v -> showImageSourceDialog());
         binding.btnBack.setOnClickListener(v -> navigateBackToMain());
     }
 
@@ -68,7 +80,35 @@ public class UpdateProfileActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+    private void showImageSourceDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Chọn nguồn ảnh")
+                .setItems(new CharSequence[]{"Chụp ảnh", "Chọn từ thư viện"}, (dialog, which) -> {
+                    if (which == 0) {
+                        captureImage(); // Chụp ảnh bằng camera
+                    } else {
+                        chooseImageFromGallery(); // Chọn ảnh từ thư viện
+                    }
+                })
+                .show();
+    }
+    private void captureImage() {
+        Log.d("DEBUG", "captureImage() được gọi!");
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, 300);  // 🚀 Gọi trực tiếp, không kiểm tra `resolveActivity()`
+    }
 
+    private File createImageFile() {
+        try {
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String imageFileName = "IMG_" + timeStamp;
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            return File.createTempFile(imageFileName, ".jpg", storageDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     private void loadUserProfile() {
         apiService.getUserProfile("Bearer " + token).enqueue(new Callback<User>() {
             @Override
@@ -133,11 +173,38 @@ public class UpdateProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 100 && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-            Uri imageUri = data.getData();
-            uploadImageToServer(imageUri);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == 100 && data != null && data.getData() != null) {
+                // Ảnh từ thư viện
+                avatarUri = data.getData();
+                uploadImageToServer(avatarUri);
+            } else if (requestCode == 300 && data != null) {
+                // Ảnh chụp từ Camera (Bitmap)
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                if (photo != null) {
+                    avatarUri = saveBitmapToFile(photo); // ✅ Lưu ảnh trước khi upload
+                    uploadImageToServer(avatarUri);
+                } else {
+                    Log.e("DEBUG", "Không thể lấy ảnh chụp từ Camera!");
+                }
+            }
         }
     }
+    private Uri saveBitmapToFile(Bitmap bitmap) {
+        File imageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "profile_avatar.jpg");
+        try {
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+            return Uri.fromFile(imageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("DEBUG", "Lỗi khi lưu ảnh chụp!");
+            return null;
+        }
+    }
+
 
     private void uploadImageToServer(Uri imageUri) {
         try {
@@ -169,6 +236,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
             Toast.makeText(this, "Không thể mở ảnh!", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // Chuyển InputStream thành byte array
     private byte[] toByteArray(InputStream inputStream) throws IOException {

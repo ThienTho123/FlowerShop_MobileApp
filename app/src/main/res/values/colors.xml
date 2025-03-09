@@ -14,5 +14,7 @@
     <color name="colorPastelYellow">#F9F0A2</color>
     <color name="colorCoral">#FF6F61</color>
     <color name="colorGray">#B0B0B0</color>
+    <color name="colorGreen">#4CAF50</color>
+    <color name="colorRed">#F44336</color>
 
 </resources>
