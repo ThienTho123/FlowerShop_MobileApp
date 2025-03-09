@@ -60,6 +60,15 @@
         <item name="android:padding">12dp</item>
     </style>
 
+    <style name="FullRoundAvatar">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+        <item name="cornerSizeTopLeft">50%</item>
+        <item name="cornerSizeTopRight">50%</item>
+        <item name="cornerSizeBottomLeft">50%</item>
+        <item name="cornerSizeBottomRight">50%</item>
+    </style>
+
 
 
     <!-- Style cho giá trị dữ liệu -->

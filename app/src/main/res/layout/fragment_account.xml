@@ -31,15 +31,16 @@
             android:gravity="center">
 
             <!-- Ảnh đại diện -->
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/imgAvatar"
-                android:layout_width="230dp"
-                android:layout_height="230dp"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
                 android:src="@drawable/ic_avatar_placeholder"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/circle_background"/>
+                app:civ_border_width="4dp"
+                app:civ_border_color="@android:color/black"/>
+
+
 
             <!-- Họ và Tên -->
             <TextView
