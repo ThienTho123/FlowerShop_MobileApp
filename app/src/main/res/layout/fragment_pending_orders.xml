@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,9 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPinkLight"
-        app:title="Các đơn hàng cần giao"
+        app:title="Đơn hàng chưa nhận"
         app:titleTextColor="@android:color/white"
-        app:navigationIcon="@drawable/ic_back" />
+        app:navigationIcon="@android:drawable/ic_menu_revert"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="10dp"/>
 
     <!-- SwipeRefreshLayout để làm mới danh sách -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -23,34 +25,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- ScrollView giúp cuộn dọc -->
-        <ScrollView
+        <!-- RecyclerView hiển thị danh sách đơn hàng -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewPendingOrders"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="true">
-
-            <!-- HorizontalScrollView giúp cuộn ngang -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fillViewport="true">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <!-- TableLayout hiển thị danh sách đơn hàng -->
-                    <TableLayout
-                        android:id="@+id/tableOrders"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:stretchColumns="*"
-                        android:background="@android:color/white"/>
-                </LinearLayout>
-            </HorizontalScrollView>
-        </ScrollView>
-
+            android:padding="8dp"
+            android:scrollbars="vertical"/>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
 </LinearLayout>
