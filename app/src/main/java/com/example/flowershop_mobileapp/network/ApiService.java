@@ -5,6 +5,7 @@ import com.example.flowershop_mobileapp.models.ChangePassword;
 
 import com.example.flowershop_mobileapp.models.Order;
 import com.example.flowershop_mobileapp.models.OrderDetail;
+import com.example.flowershop_mobileapp.models.ShipperNoteImage;
 import com.example.flowershop_mobileapp.models.ShippingRequest;
 import com.example.flowershop_mobileapp.models.User;
 
@@ -68,11 +69,12 @@ public interface ApiService {
     @POST("/shipperaccount/haveship/{orderid}/start")
     Call<String> startDelivery(@Path("orderid") int orderID);
 
-    @POST("/shipperaccount/haveship/{orderid}/fail")
-    Call<String> failDelivery(@Path("orderid") int orderID);
-
     @POST("/shipperaccount/haveship/{orderid}/success")
-    Call<String> successDelivery(@Path("orderid") int orderID);
+    Call<String> successDelivery(@Path("orderid") int orderID, @Body ShipperNoteImage requestBody);
+
+    @POST("/shipperaccount/haveship/{orderid}/fail")
+    Call<String> failDelivery(@Path("orderid") int orderID, @Body ShipperNoteImage requestBody);
+
 
 
 }

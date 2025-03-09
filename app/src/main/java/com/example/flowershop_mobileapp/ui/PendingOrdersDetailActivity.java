@@ -1,27 +1,44 @@
 package com.example.flowershop_mobileapp.ui;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.flowershop_mobileapp.R;
 import com.example.flowershop_mobileapp.models.OrderDetail;
 import com.example.flowershop_mobileapp.models.Product;
+import com.example.flowershop_mobileapp.models.ShipperNoteImage;
 import com.example.flowershop_mobileapp.network.ApiClient;
 import com.example.flowershop_mobileapp.network.ApiService;
 import com.google.gson.Gson;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,6 +51,10 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
     private Button btnStartDelivery, btnSuccessDelivery, btnFailDelivery;
     private int orderID;
     private ApiService apiService;
+    private EditText etFailureReason;
+    private ImageView imgDeliveryProof;
+    private Uri proofImageUri;
+    private String token;
 
 
     @Override
@@ -45,6 +66,7 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        token = getSharedPreferences("auth", MODE_PRIVATE).getString("token", "");
 
         toolbar.setNavigationOnClickListener(v -> onBackPressed()); // 🔙 Xử lý quay lại
 
@@ -73,18 +95,158 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
 
         apiService = ApiClient.getApiService(this);
 
+
+
         // Nhận orderID từ Intent
-        int orderID = getIntent().getIntExtra("ORDER_ID", -1);
+        orderID = getIntent().getIntExtra("ORDER_ID", -1);
         if (orderID != -1) {
             fetchOrderDetail(orderID);
         } else {
             Toast.makeText(this, "Lỗi: Không tìm thấy đơn hàng!", Toast.LENGTH_SHORT).show();
         }
+        btnSuccessDelivery.setOnClickListener(v -> selectImageForSuccess(orderID));
+        btnFailDelivery.setOnClickListener(v -> selectImageForFailure(orderID));
+
+        etFailureReason = findViewById(R.id.etFailureReason);
+        imgDeliveryProof = findViewById(R.id.imgDeliveryProof);
 
         btnStartDelivery.setOnClickListener(v -> startDelivery(orderID));
-        btnSuccessDelivery.setOnClickListener(v -> successDelivery(orderID));
-        btnFailDelivery.setOnClickListener(v -> failDelivery(orderID));
+        btnSuccessDelivery.setOnClickListener(v -> {
+            if (proofImageUri == null) {
+                Toast.makeText(this, "Vui lòng chọn ảnh trước!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            uploadImage(orderID, true); // ✅ Gửi ảnh chỉ khi người dùng ấn nút
+        });
+
+        btnFailDelivery.setOnClickListener(v -> {
+            if (proofImageUri == null) {
+                Toast.makeText(this, "Vui lòng chọn ảnh trước!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (etFailureReason.getText().toString().trim().isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập lý do thất bại!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            uploadImage(orderID, false); // ✅ Gửi ảnh + lý do khi người dùng ấn nút
+        });
+
+        imgDeliveryProof.setOnClickListener(v -> {
+            Log.d("DEBUG", "Người dùng bấm vào imgDeliveryProof để chọn ảnh.");
+            selectImage();
+        });
+
     }
+    private void selectImage() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, 200);
+    }
+
+    private void selectImageForSuccess(int orderID) {
+        etFailureReason.setVisibility(View.GONE); // Ẩn khung nhập lý do
+        imgDeliveryProof.setVisibility(View.VISIBLE); // Hiển thị ảnh
+
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, 200);
+    }
+
+
+    private void selectImageForFailure(int orderID) {
+        etFailureReason.setVisibility(View.VISIBLE); // Hiển thị khung nhập lý do
+        imgDeliveryProof.setVisibility(View.VISIBLE); // Hiển thị ảnh
+
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, 201);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            proofImageUri = data.getData();
+            imgDeliveryProof.setVisibility(View.VISIBLE);
+            imgDeliveryProof.setImageURI(proofImageUri);
+
+            Log.d("DEBUG", "Ảnh đã chọn: " + proofImageUri.toString()); // Kiểm tra ảnh có được chọn không
+        }
+    }
+
+
+    private void uploadImage(int orderID, boolean isSuccess) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(proofImageUri);
+            RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), toByteArray(inputStream));
+            MultipartBody.Part body = MultipartBody.Part.createFormData("file", "proof.jpg", requestBody);
+
+            apiService.uploadImage("Bearer " + token, body).enqueue(new Callback<Map<String, Object>>() {
+                @Override
+                public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String imageUrl = (String) response.body().get("DT");
+                        sendDeliveryResult(orderID, imageUrl, isSuccess);
+                    } else {
+                        Toast.makeText(PendingOrdersDetailActivity.this, "Upload ảnh thất bại!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                    Toast.makeText(PendingOrdersDetailActivity.this, "Lỗi kết nối khi upload ảnh!", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Không thể mở ảnh!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void sendDeliveryResult(int orderID, String imageUrl, boolean isSuccess) {
+        // Tạo request body
+        ShipperNoteImage requestBody = isSuccess
+                ? new ShipperNoteImage(imageUrl, null)  // Giao hàng thành công chỉ cần ảnh
+                : new ShipperNoteImage(imageUrl, etFailureReason.getText().toString()); // Giao hàng thất bại cần ảnh + lý do
+
+        // Gọi API với cả orderID và requestBody
+        Call<String> call = isSuccess
+                ? apiService.successDelivery(orderID, requestBody)
+                : apiService.failDelivery(orderID, requestBody);
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(PendingOrdersDetailActivity.this, isSuccess ? "Giao hàng thành công!" : "Giao hàng thất bại!", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(PendingOrdersDetailActivity.this, "Lỗi cập nhật trạng thái!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(PendingOrdersDetailActivity.this, "Lỗi kết nối!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
+
+    // Chuyển InputStream thành byte array
+    private byte[] toByteArray(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[1024];
+        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+        return buffer.toByteArray();
+    }
+
     private void startDelivery(int orderID) {
         apiService.startDelivery(orderID).enqueue(new Callback<String>() {
             @Override
@@ -99,8 +261,10 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
             }
         });
     }
-    private void successDelivery(int orderID) {
-        apiService.successDelivery(orderID).enqueue(new Callback<String>() {
+    private void successDelivery(int orderID, String imageUrl) {
+        ShipperNoteImage requestBody = new ShipperNoteImage(imageUrl, null); // Thành công chỉ cần ảnh
+
+        apiService.successDelivery(orderID, requestBody).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 Toast.makeText(PendingOrdersDetailActivity.this, "Giao hàng thành công!", Toast.LENGTH_SHORT).show();
@@ -114,8 +278,17 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void failDelivery(int orderID) {
-        apiService.failDelivery(orderID).enqueue(new Callback<String>() {
+
+    private void failDelivery(int orderID, String imageUrl) {
+        String reason = etFailureReason.getText().toString().trim();
+        if (reason.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập lý do thất bại!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ShipperNoteImage requestBody = new ShipperNoteImage(imageUrl, reason);
+
+        apiService.failDelivery(orderID, requestBody).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 Toast.makeText(PendingOrdersDetailActivity.this, "Giao hàng thất bại!", Toast.LENGTH_SHORT).show();
@@ -128,6 +301,7 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
             }
         });
     }
+
     private void fetchOrderDetail(int orderID) {
         ApiClient.getApiService(this).getOrderDetail(orderID).enqueue(new Callback<OrderDetail>() {
             @Override
@@ -249,6 +423,18 @@ public class PendingOrdersDetailActivity extends AppCompatActivity {
             Log.e("OrderDetailActivity", "Danh sách sản phẩm bị null hoặc rỗng!");
             return;
         }
+        if (btnSuccessDelivery.getVisibility() == View.VISIBLE || btnFailDelivery.getVisibility() == View.VISIBLE) {
+            imgDeliveryProof.setVisibility(View.VISIBLE); // Hiển thị imgDeliveryProof
+            if (btnFailDelivery.getVisibility() == View.VISIBLE) {
+                etFailureReason.setVisibility(View.VISIBLE); // Hiển thị etFailureReason nếu nút "Thất bại" hiển thị
+            } else {
+                etFailureReason.setVisibility(View.GONE); // Ẩn etFailureReason nếu nút "Thất bại" không hiển thị
+            }
+        } else {
+            imgDeliveryProof.setVisibility(View.GONE); // Ẩn imgDeliveryProof nếu không có nút nào hiển thị
+            etFailureReason.setVisibility(View.GONE); // Ẩn etFailureReason
+        }
+
 
         // ✅ Hiển thị danh sách sản phẩm trong đơn hàng
         tableProducts.removeAllViews();
