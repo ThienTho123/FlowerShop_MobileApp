@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPinkLight"
-        app:title="Đơn hàng chưa nhận"
+        app:title="Đơn hàng cần giao"
         app:titleTextColor="@android:color/white"
         app:navigationIcon="@android:drawable/ic_menu_revert"
         android:clickable="true"

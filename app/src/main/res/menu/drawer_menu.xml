@@ -5,6 +5,11 @@
         android:icon="@drawable/ic_account" />
 
     <item
+        android:id="@+id/nav_flower_detect"
+        android:title="Nhận diện hoa"
+        android:icon="@drawable/ic_flower_detect" />
+
+    <item
         android:id="@+id/nav_delivered_orders"
         android:title="Đơn hàng đã giao"
         android:icon="@drawable/ic_delivered" />

@@ -14,6 +14,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import com.example.flowershop_mobileapp.ui.FlowerDetectActivity;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_account,
+                R.id.nav_flower_detect,
                 R.id.nav_delivered_orders,
                 R.id.nav_unassigned_orders,
                 R.id.nav_pending_orders,
@@ -56,7 +59,14 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
         navView.setNavigationItemSelectedListener(menuItem -> {
-            if (menuItem.getItemId() == R.id.nav_logout) {
+            int itemId = menuItem.getItemId();
+
+            if (itemId == R.id.nav_flower_detect) {
+                // Chuyển đến FlowerDetectActivity
+                Intent intent = new Intent(MainActivity.this, FlowerDetectActivity.class);
+                startActivity(intent);
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else if (itemId == R.id.nav_logout) {
                 showLogoutDialog();
             } else {
                 NavigationUI.onNavDestinationSelected(menuItem, navController);

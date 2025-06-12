@@ -8,6 +8,7 @@ import com.example.flowershop_mobileapp.models.OrderDetail;
 import com.example.flowershop_mobileapp.models.ShipperNoteImage;
 import com.example.flowershop_mobileapp.models.ShippingRequest;
 import com.example.flowershop_mobileapp.models.User;
+import com.example.flowershop_mobileapp.ui.FlowerDetectResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,28 @@ public interface ApiService {
     @POST("/shipperaccount/haveship/{orderid}/fail")
     Call<String> failDelivery(@Path("orderid") int orderID, @Body ShipperNoteImage requestBody);
 
+// ========== FLOWER DETECTION API ==========
 
+    /**
+     * API nhận diện loài hoa từ hình ảnh
+     * @param file MultipartBody.Part chứa file ảnh cần nhận diện
+     * @return FlowerDetectResponse chứa kết quả nhận diện và danh sách sản phẩm gợi ý
+     */
+    @Multipart
+    @POST("detect/upload")
+    Call<FlowerDetectResponse> detectFlower(@Part MultipartBody.Part file);
+
+    /**
+     * API nhận diện loài hoa với token xác thực (nếu cần)
+     * @param token Token xác thực người dùng
+     * @param file MultipartBody.Part chứa file ảnh cần nhận diện
+     * @return FlowerDetectResponse chứa kết quả nhận diện và danh sách sản phẩm gợi ý
+     */
+    @Multipart
+    @POST("detect/upload")
+    Call<FlowerDetectResponse> detectFlowerWithAuth(
+            @Header("Authorization") String token,
+            @Part MultipartBody.Part file
+    );
 
 }
